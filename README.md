@@ -4,8 +4,6 @@ Your Claude plan limits in the KDE Plasma panel and in the Claude Code status li
 week, week per model (like Fable) and how full the context of your current Claude Code sessions is,
 each with a small bar and when it resets.
 
-I won't bore you with why I built this. If you're curious, there's a [section at the end](#why-i-built-this).
-
 ![The widget in a vertical panel with its popup open](docs/popup.png)
 
 ## What you get
@@ -54,13 +52,6 @@ if you don't have one yet. If you do, it tells you the command and leaves yours 
 Run `./install.sh` again to update, `./uninstall.sh` to remove everything.
 
 Without Plasma you still get the status line, the widget is just skipped.
-
-## Why I built this
-
-I wanted my limits in the panel instead of typing `/usage` all the time.
-The widgets I found poll that endpoint every minute or renew the token themselves, which can log Claude
-Code out. So I wanted one that mostly uses what Claude Code already hands out and only asks the API now
-and then.
 
 ## License
 
