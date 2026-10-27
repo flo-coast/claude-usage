@@ -1,0 +1,6 @@
+[Unit]
+Description=Claude usage: fetch plan limits (Fable etc.) for the panel widget, only while Claude Code is in use
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 -I @DEST@/poll.py

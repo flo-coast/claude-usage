@@ -1,0 +1,15 @@
+{
+    "KPlugin": {
+        "Id": "org.flocoast.claudeusage",
+        "Name": "Claude Usage",
+        "Description": "Claude plan limits (session, week, week per model) with reset countdowns",
+        "Icon": "speedometer",
+        "Category": "System Information",
+        "Authors": [{ "Name": "flo-coast" }],
+        "Website": "https://github.com/flo-coast/claude-usage",
+        "License": "GPL-3.0-or-later",
+        "Version": "1.0"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0",
+    "KPackageStructure": "Plasma/Applet"
+}

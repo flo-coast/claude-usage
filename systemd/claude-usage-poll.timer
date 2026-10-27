@@ -1,0 +1,10 @@
+[Unit]
+Description=Claude usage: check every 5 min (poll.py itself calls the API at most every 15 min)
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+RandomizedDelaySec=30s
+
+[Install]
+WantedBy=timers.target

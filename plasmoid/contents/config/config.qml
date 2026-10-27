@@ -1,0 +1,9 @@
+import org.kde.plasma.configuration
+
+ConfigModel {
+    ConfigCategory {
+        name: "Appearance"
+        icon: "preferences-desktop-color"
+        source: "configAppearance.qml"
+    }
+}
