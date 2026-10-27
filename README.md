@@ -12,6 +12,9 @@ each with a small bar and when it resets.
 - **Panel widget** with one number and a thin bar per limit. Works in horizontal and vertical panels.
 - **Popup** with bigger bars, reset countdowns, the context of every Claude Code session active in the
   last 30 min, how old the data is and a refresh button
+- **History** in the popup, a small graph per limit for the current window with a dashed line to where
+  your pace ends up. Below it either about how many % you'll be at when it resets, or when you'd run out.
+  Kept for 5 weeks in `~/.local/state/claude-usage`.
 - Colours turn yellow from 70 % and red from 90 %. Colours and thresholds are in the widget settings,
   or use your Plasma theme's colours.
 
