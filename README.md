@@ -6,6 +6,8 @@ each with a small bar and when it resets.
 
 I won't bore you with why I built this. If you're curious, there's a [section at the end](#why-i-built-this).
 
+![The widget in a vertical panel with its popup open](docs/popup.png)
+
 ## What you get
 
 - **Status line** in Claude Code, for example `Opus 5.5 · ctx 34% · 5h 7% · wk 20% · Fable 16%`
