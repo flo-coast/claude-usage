@@ -16,6 +16,7 @@ KCM.SimpleKCM {
     property alias cfg_critAt: critAt.value
     property alias cfg_colorNumbers: numbers.checked
     property alias cfg_showContext: showContext.checked
+    property alias cfg_showHistory: showHistory.checked
 
     Kirigami.FormLayout {
         QQC2.CheckBox {
@@ -51,6 +52,11 @@ KCM.SimpleKCM {
             id: showContext
             Kirigami.FormData.label: "Context:"
             text: "Show how full the context of the current Claude Code session is"
+        }
+        QQC2.CheckBox {
+            id: showHistory
+            Kirigami.FormData.label: "History:"
+            text: "Graph of each limit in the popup, with where the current pace ends up"
         }
         QQC2.Button {
             text: "Back to Claude orange"

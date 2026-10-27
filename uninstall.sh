@@ -22,5 +22,5 @@ if "claude-usage/statusline.py" in (cfg.get("statusLine") or {}).get("command", 
     print("status line removed from", path)
 PY
 
-rm -rf "$DEST" "${XDG_CACHE_HOME:-$HOME/.cache}/claude-usage"
+rm -rf "$DEST" "${XDG_CACHE_HOME:-$HOME/.cache}/claude-usage" "${XDG_STATE_HOME:-$HOME/.local/state}/claude-usage"
 echo "Done. Remove the widget from your panel if it's still there."

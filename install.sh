@@ -8,7 +8,7 @@ UNITS="${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user"
 
 mkdir -p "$DEST" "$UNITS"
 install -m 644 "$SRC/claude_usage.py" "$DEST/"
-install -m 755 "$SRC/poll.py" "$SRC/statusline.py" "$DEST/"
+install -m 755 "$SRC/poll.py" "$SRC/statusline.py" "$SRC/history.py" "$DEST/"
 for u in claude-usage-poll.service claude-usage-poll.timer; do
     rm -f "$UNITS/$u"                                  # may be an old symlink into the source folder
     sed "s|@DEST@|$DEST|" "$SRC/systemd/$u" > "$UNITS/$u"

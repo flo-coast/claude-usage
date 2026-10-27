@@ -1,6 +1,6 @@
 // Claude Usage: shows the plan limits from ~/.cache/claude-usage/state.json (written by statusline.py and
 // poll.py). Panel: one small percentage + bar per limit, plus the context fill of the Claude Code session
-// used last. Popup: bars, reset countdowns, the context of every recently active session, data age, refresh.
+// used last. Popup: bars, reset countdowns, a graph of each window with a forecast (history.py), the context of every recently active session, data age, refresh.
 import QtQuick
 import QtQuick.Layouts
 import org.kde.plasma.plasmoid
@@ -13,11 +13,13 @@ PlasmoidItem {
     id: root
 
     readonly property string stateCmd: "cat \"${XDG_CACHE_HOME:-$HOME/.cache}/claude-usage/state.json\""
+    readonly property string histCmd: "python3 -I \"${XDG_DATA_HOME:-$HOME/.local/share}/claude-usage/history.py\""
     readonly property string pollCmd: "python3 -I \"${XDG_DATA_HOME:-$HOME/.local/share}/claude-usage/poll.py\" --force"
     readonly property int staleSecs: 30 * 60
     property var st: null
     property real now: Date.now() / 1000
     property bool refreshing: false
+    property var hist: ({})                          // history.py output, only fetched while the popup is open
     readonly property var keys: st ? (st.order || Object.keys(st.limits)) .filter(k => st.limits[k]) : []
     // Claude Code sessions with a status line update in the last 30 min, newest first
     readonly property var contexts: st && st.contexts && cfg.showContext
@@ -40,6 +42,8 @@ PlasmoidItem {
             disconnectSource(source)
             if (source === root.stateCmd) {
                 try { root.st = JSON.parse(data["stdout"]) } catch (e) { }
+            } else if (source === root.histCmd) {
+                try { root.hist = JSON.parse(data["stdout"]) } catch (e) { }
             } else if (source === root.pollCmd) {
                 root.refreshing = false
                 exec.connectSource(root.stateCmd)
@@ -53,6 +57,12 @@ PlasmoidItem {
             root.now = Date.now() / 1000
             exec.connectSource(root.stateCmd)
         }
+    }
+
+    Timer {
+        interval: 60000
+        running: root.expanded; repeat: true; triggeredOnStart: true
+        onTriggered: exec.connectSource(root.histCmd)
     }
 
     function pct(l) { return l.resets_at && l.resets_at <= now ? 0 : l.percent }
@@ -87,6 +97,11 @@ PlasmoidItem {
         if (!l.resets_at) return "unknown"
         if (l.resets_at <= now) return "done, back at 0 %"
         return "in " + span(l.resets_at - now) + " (" + clock(l.resets_at) + ")"
+    }
+    function forecast(h) {
+        if (!h || h.at_reset === null) return ""
+        if (h.runs_out) return "At this pace it runs out " + clock(h.runs_out)
+        return "At this pace about " + h.at_reset + " % at the reset"
     }
     function ago(t) { return t ? span(now - t) + " ago" : "never" }
 
@@ -212,6 +227,60 @@ PlasmoidItem {
                     text: "Resets " + root.resetText(lim)
                           + (root.stale(lim) ? "  ·  as of " + root.clock(lim.at) : "")
                     opacity: 0.7
+                    font.pixelSize: Kirigami.Theme.smallFont.pixelSize
+                }
+                Canvas {                             // the window so far, dashed on to where this pace ends up
+                    id: graph
+                    readonly property var h: root.hist[modelData]
+                    visible: cfg.showHistory && !!h
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: Kirigami.Units.gridUnit * 2.5
+                    Layout.topMargin: 2
+                    onHChanged: requestPaint()
+                    onWidthChanged: requestPaint()
+                    onPaint: {
+                        const c = getContext("2d")
+                        c.reset()
+                        if (!h) return
+                        const x = t => (t - h.start) / (h.end - h.start) * width
+                        const y = q => height - 1 - Math.min(100, q) / 100 * (height - 2)
+                        const tc = Kirigami.Theme.textColor, col = root.color(p)
+                        c.lineWidth = 1
+                        c.strokeStyle = Qt.alpha(tc, 0.12)       // frame lines at 0, warn level and 100 %
+                        for (const q of [0, cfg.warnAt, 100]) {
+                            c.beginPath(); c.moveTo(0, y(q)); c.lineTo(width, y(q)); c.stroke()
+                        }
+                        const pts = h.points
+                        const last = pts[pts.length - 1]
+                        if (h.at_reset !== null) {               // forecast
+                            c.strokeStyle = Qt.alpha(root.color(h.at_reset), 0.8)
+                            c.setLineDash([3, 3])
+                            c.beginPath(); c.moveTo(x(last[0]), y(last[1])); c.lineTo(width, y(h.at_reset)); c.stroke()
+                            c.setLineDash([])
+                        }
+                        c.fillStyle = Qt.alpha(col, 0.18)        // area under what really happened
+                        c.beginPath(); c.moveTo(0, y(0))
+                        for (const pt of pts) c.lineTo(x(pt[0]), y(pt[1]))
+                        c.lineTo(x(last[0]), y(0)); c.closePath(); c.fill()
+                        c.lineWidth = 1.5
+                        c.strokeStyle = Qt.alpha(col, 0.6)      // from the window start to the first real point
+                        c.setLineDash([2, 3])                    // only known to start at 0
+                        c.beginPath(); c.moveTo(x(pts[0][0]), y(pts[0][1])); c.lineTo(x(pts[1][0]), y(pts[1][1])); c.stroke()
+                        c.setLineDash([])
+                        c.strokeStyle = col
+                        c.beginPath(); c.moveTo(x(pts[1][0]), y(pts[1][1]))
+                        for (const pt of pts.slice(2)) c.lineTo(x(pt[0]), y(pt[1]))
+                        c.stroke()
+                        c.fillStyle = col                        // now
+                        c.beginPath(); c.arc(x(last[0]), y(last[1]), 2.5, 0, 2 * Math.PI); c.fill()
+                    }
+                }
+                PC3.Label {
+                    visible: cfg.showHistory && text !== ""
+                    text: root.forecast(root.hist[modelData])
+                    color: root.hist[modelData] && root.hist[modelData].at_reset >= cfg.warnAt
+                           ? root.color(root.hist[modelData].at_reset) : Kirigami.Theme.textColor
+                    opacity: color === Kirigami.Theme.textColor ? 0.7 : 1
                     font.pixelSize: Kirigami.Theme.smallFont.pixelSize
                 }
             }
