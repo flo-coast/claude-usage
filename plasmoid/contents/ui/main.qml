@@ -188,6 +188,7 @@ PlasmoidItem {
     // ---------- popup ----------
     fullRepresentation: ColumnLayout {
         Layout.preferredWidth: Kirigami.Units.gridUnit * 22
+        Layout.minimumWidth: Kirigami.Units.gridUnit * 22
         Layout.minimumHeight: implicitHeight
         spacing: Kirigami.Units.largeSpacing
 

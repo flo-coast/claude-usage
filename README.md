@@ -4,7 +4,7 @@ Your Claude plan limits in the KDE Plasma panel and in the Claude Code status li
 week, week per model (like Fable) and how full the context of your current Claude Code sessions is,
 each with a small bar and when it resets.
 
-![The widget in a vertical panel with its popup open](docs/popup.png)
+<img src="docs/popup.png" width="420" alt="The popup with the limits, their history and the forecast">
 
 ## What you get
 
